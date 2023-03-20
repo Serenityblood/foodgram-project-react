@@ -29,7 +29,6 @@ class Ingredient(models.Model):
         max_length=50,
         blank=False
     )
-    amount = models.IntegerField()
     measurement_unit = models.CharField(max_length=10)
 
 
@@ -42,10 +41,11 @@ class Recipe(models.Model):
     ingredients = models.ManyToManyField(
         Ingredient,
         blank=False,
+        through='IngForRec'
     )
     image = models.ImageField(
         upload_to='recipe/images/',
-        null=False, 
+        null=False,
         default=None,
         blank=False
         )
@@ -66,22 +66,49 @@ class Recipe(models.Model):
     )
 
 
-# class Follow(models.Model):
-#    user = models.ForeignKey(
-#        User, on_delete=models.CASCADE, related_name='follower'
-#    )
-#    following = models.ForeignKey(
-#        User, on_delete=models.CASCADE, related_name='following'
-#    )
+class IngForRec(models.Model):
+    ingredient = models.ForeignKey(
+        Ingredient,
+        on_delete=models.PROTECT,
+        related_name='ing_for_rec'
+    )
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='ing_for_rec'
+    )
+    amount = models.IntegerField(blank=False)
 
-#    class Meta:
-#        constraints = [
-#            models.UniqueConstraint(
-#                fields=['user', 'following'],
-#                name='unique_follow',
-#            ),
-#            models.CheckConstraint(
-#                name='prevent_self_follow',
-#                check=~models.Q(user=models.F('following'))
-#            )
-#        ]
+
+class Favorite(models.Model):
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='favorite'
+    )
+    recipe = models.ForeignKey(
+        Recipe, on_delete=models.CASCADE, related_name='favorite'
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'recipe'],
+                name='unqiue_favorite'
+            )
+        ]
+
+
+class ShoppingCard(models.Model):
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='shopping_card'
+    )
+    recipe = models.ForeignKey(
+        Recipe, on_delete=models.CASCADE, related_name='shopping_card'
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'recipe'],
+                name='unique_shopping_card'
+            )
+        ]
