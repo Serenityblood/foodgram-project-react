@@ -102,7 +102,7 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.'
                                 'PageNumberPagination',
-    'PAGE_SIZE': 10,
+    'PAGE_SIZE': 6,
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend'
     ],
@@ -134,6 +134,8 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
 AUTH_USER_MODEL = 'users.User'
 
 ALLOWED_SYMBOLS = r'[\w.@+-]'
@@ -144,3 +146,5 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 USERNAME_SIZE = 150
 
 EMAIL_SIZE = 254
+
+NAME_SIZE = 200

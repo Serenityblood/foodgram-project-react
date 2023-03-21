@@ -1,3 +1,4 @@
+from django.db.models import F, Sum
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, status, viewsets, views
@@ -6,12 +7,14 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from .filters import RecipeFilter
-from .models import Favorite, Ingredient, Recipe, ShoppingCart, Tag
+from .models import (
+    Favorite, Ingredient, Recipe, RecipeIngredient, ShoppingCart, Tag
+)
 from .permissions import AuthorOrReadOnly
 from .serializers import (
     CreateRecipeSerializer, FavoriteSerializer, IngredientSerializer,
     SubscriptionsSerializer,
-    TagSerializer, UserSerializer, ViewRecipeSerializer
+    TagSerializer, ViewRecipeSerializer
 )
 from .utils import get_shopping_list
 from users.models import Subscribe, User
@@ -46,7 +49,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(methods=['GET'], permission_classes=(AllowAny,), detail=False)
     def download_shopping_cart(self, request):
-        return get_shopping_list(self, request)
+        user = request.user
+        shopping_list = RecipeIngredient.objects.filter(
+            recipe__shoppingcart_set__user=user).values(
+            name=F('ingredient__name'),
+            unit=F('ingredient__measurement_unit')
+            ).annotate(amount=Sum('amount')).order_by()
+        return get_shopping_list(self, shopping_list)
 
     @action(methods=['POST'], detail=True)
     def favorite(self, request, pk):
@@ -120,12 +129,3 @@ class APISubscribe(views.APIView):
            Subscribe, user=request.user, author=get_object_or_404(User, id=id)
             ).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-class APIShoppingCard(views.APIView):
-    def post(self, request, id):
-        return post(request, id, ShoppingCart)
-
-    def delete(self, request, id):
-        return delete(request, id, ShoppingCart)
-

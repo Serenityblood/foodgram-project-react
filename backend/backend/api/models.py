@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from django.core.validators import MinValueValidator
 
@@ -82,7 +83,7 @@ class Recipe(models.Model):
         )
     name = models.CharField(
         'Название',
-        max_length=200,
+        max_length=settings.NAME_SIZE,
         blank=False,
     )
     tags = models.ManyToManyField(

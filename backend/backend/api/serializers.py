@@ -2,7 +2,9 @@ from base64 import b64encode
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 
-from .models import Favorite, RecipeIngredient, Ingredient, Recipe, ShoppingCart, Tag
+from .models import (
+    Favorite, RecipeIngredient, Ingredient, Recipe, ShoppingCart, Tag
+)
 from users.models import Subscribe, User
 
 
@@ -25,6 +27,8 @@ class UserSerializer(serializers.ModelSerializer):
         if not request.user:
             return serializers.DjangoValidationError('Не авторизован')
         user = request.user
+        if user.is_anonymous:
+            return False
         return user.subscriber.filter(author=author).exists()
 
 
@@ -78,20 +82,20 @@ class ViewRecipeSerializer(serializers.ModelSerializer):
     def get_is_favorited(self, obj):
         request = self.context.get('request')
         if not request.user:
-            return serializers.DjangoValidationError('Не авторизован')
+            return False
         user = request.user
-        if Favorite.objects.filter(user=user, recipe=obj).exists():
-            return True
-        return False
+        if not user.is_authenticated:
+            return False
+        return Favorite.objects.filter(user=user, recipe=obj).exists()
 
     def get_is_in_shopping_cart(self, obj):
         request = self.context.get('request')
         if not request.user:
-            return serializers.DjangoValidationError('Не авторизован')
+            return False
         user = request.user
-        if ShoppingCart.objects.filter(user=user, recipe=obj).exists():
-            return True
-        return False
+        if not user.is_authenticated:
+            return False
+        return ShoppingCart.objects.filter(user=user, recipe=obj).exists()
 
 
 class AddIngForRecSerializer(serializers.ModelSerializer):
@@ -179,7 +183,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
                 'Время готовки должно быть больше 1'
             )
         return value
-    
+
     def to_representation(self, instance):
         ingredients = []
         for obj in instance.recipeingredient_set.all():
@@ -198,7 +202,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
             'tags': tags,
             'text': instance.text,
             'cooking_time': instance.cooking_time,
-            'image': instance.image
+            'image': b64encode(instance.image.read())
         }
 
 

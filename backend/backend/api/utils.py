@@ -1,21 +1,12 @@
 import io
 
-from django.db.models import F, Sum
 from django.http import FileResponse
 from reportlab.pdfgen import canvas
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfbase import pdfmetrics
 
-from api.models import RecipeIngredient
 
-
-def get_shopping_list(self, request):
-    user = request.user
-    shopping_list = RecipeIngredient.objects.filter(
-        recipe__shoppingcart_set__user=user).values(
-        name=F('ingredient__name'),
-        unit=F('ingredient__measurement_unit')
-    ).annotate(amount=Sum('amount')).order_by()
+def get_shopping_list(self, shopping_list):
     font = 'DejaVuSerif'
     pdfmetrics.registerFont(
         TTFont('DejaVuSerif', 'DejaVuSerif.ttf', 'UTF-8'))
