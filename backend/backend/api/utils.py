@@ -1,31 +1,18 @@
-import base64
 import io
 
 from django.db.models import F, Sum
-from django.core.files.base import ContentFile
 from django.http import FileResponse
 from reportlab.pdfgen import canvas
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfbase import pdfmetrics
-from rest_framework import serializers
 
-from api.models import IngForRec
-
-
-class Base64ImageField(serializers.ImageField):
-    def to_internal_value(self, data):
-        if isinstance(data, str) and data.startswith('data:image'):
-            format, imgstr = data.split(';base64,')
-            ext = format.split('/')[-1]
-            data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
-
-        return super().to_internal_value(data)
+from api.models import RecipeIngredient
 
 
 def get_shopping_list(self, request):
     user = request.user
-    shopping_list = IngForRec.objects.filter(
-        recipe__shopping_card__user=user).values(
+    shopping_list = RecipeIngredient.objects.filter(
+        recipe__shoppingcart_set__user=user).values(
         name=F('ingredient__name'),
         unit=F('ingredient__measurement_unit')
     ).annotate(amount=Sum('amount')).order_by()

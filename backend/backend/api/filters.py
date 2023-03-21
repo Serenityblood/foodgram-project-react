@@ -1,7 +1,6 @@
 from django_filters import AllValuesMultipleFilter
 from django_filters import rest_framework as filters
 from django_filters.widgets import BooleanWidget
-from rest_framework.filters import SearchFilter
 
 from .models import Recipe
 
@@ -14,7 +13,6 @@ class RecipeFilter(filters.FilterSet):
         method='filter_is_favorited', widget=BooleanWidget()
     )
     tags = AllValuesMultipleFilter(field_name='tags__slug')
-    author = AllValuesMultipleFilter(field_name='author__id')
 
     def filter_is_favorited(self, queryset, name, value):
         user = self.request.user
@@ -30,8 +28,6 @@ class RecipeFilter(filters.FilterSet):
 
     class Meta:
         model = Recipe
-        fields = ['tags__slug', 'is_favorited', 'is_in_shopping_cart']
-
-
-class IngredientSearchFilter(SearchFilter):
-    search_param = 'name'
+        fields = [
+            'tags__slug', 'is_favorited', 'is_in_shopping_cart', 'author'
+        ]
