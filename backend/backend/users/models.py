@@ -28,13 +28,13 @@ class User(AbstractUser):
     USERNAME_FIELD = ('email')
     REQUIRED_FIELDS = ('first_name', 'last_name', 'username')
 
-    def __str__(self):
-        return f'{self.username}'
-
     class Meta:
         ordering = ('username',)
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
+
+    def __str__(self):
+        return f'{self.username}'
 
 
 class Subscribe(models.Model):
@@ -46,9 +46,6 @@ class Subscribe(models.Model):
         User, on_delete=models.CASCADE, related_name='subscribing',
         verbose_name='Автор'
     )
-
-    def __str__(self) -> str:
-        return f'{self.user} on {self.author}'
 
     class Meta:
         ordering = ('user',)
@@ -64,3 +61,6 @@ class Subscribe(models.Model):
                 check=~models.Q(user=models.F('author'))
             )
         ]
+
+    def __str__(self) -> str:
+        return f'{self.user} on {self.author}'

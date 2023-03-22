@@ -10,10 +10,12 @@ from .filters import RecipeFilter
 from .models import (
     Favorite, Ingredient, Recipe, RecipeIngredient, ShoppingCart, Tag
 )
+from .paginators import CustomPaginator
 from .permissions import AuthorOrReadOnly
 from .serializers import (
-    CreateRecipeSerializer, FavoriteSerializer, IngredientSerializer,
-    SubscriptionsSerializer,
+    CreateRecipeSerializer, FavoriteRecipeSerializer,
+    FavoriteSerializer, IngredientSerializer,
+    ShoppingCartSerializer, SubscriptionsSerializer,
     TagSerializer, ViewRecipeSerializer
 )
 from .utils import get_shopping_list
@@ -24,6 +26,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     """ Обрабатывает запросы к рецептам"""
     queryset = Recipe.objects.all()
     permission_classes = (AuthorOrReadOnly,)
+    pagination_class = CustomPaginator
     filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
     filterset_class = RecipeFilter
     filterset_field = ('tags', 'author')
@@ -34,12 +37,16 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return ViewRecipeSerializer
         return CreateRecipeSerializer
 
-    def post_req(self, request, id, model):
+    def post_req(self, request, id, model, serializer):
         user = request.user
-        recipe = get_object_or_404(Recipe, id=id)
-        model.objects.get_or_create(user=user, recipe=recipe)
-        serializer = FavoriteSerializer(recipe, context={'request': request})
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        serializer = serializer(data={'user': user.id, 'recipe': id})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(
+            FavoriteRecipeSerializer(
+                get_object_or_404(Recipe, id=id), context={'request': request}
+            ).data, status=status.HTTP_201_CREATED
+        )
 
     def delete_req(self, request, id, model):
         get_object_or_404(
@@ -51,7 +58,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def download_shopping_cart(self, request):
         user = request.user
         shopping_list = RecipeIngredient.objects.filter(
-            recipe__shoppingcart_set__user=user).values(
+            recipe__shopping_cart__user=user).values(
             name=F('ingredient__name'),
             unit=F('ingredient__measurement_unit')
             ).annotate(amount=Sum('amount')).order_by()
@@ -59,7 +66,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(methods=['POST'], detail=True)
     def favorite(self, request, pk):
-        return self.post_req(request, pk, Favorite)
+        return self.post_req(request, pk, Favorite, FavoriteSerializer)
 
     @favorite.mapping.delete
     def delete_favorite(self, request, pk):
@@ -67,7 +74,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(methods=['POST'], detail=True)
     def shopping_cart(self, request, pk):
-        return self.post_req(request, pk, ShoppingCart)
+        return self.post_req(request, pk, ShoppingCart, ShoppingCartSerializer)
 
     @shopping_cart.mapping.delete
     def delete_shopping_cart(self, request, pk):
@@ -93,26 +100,11 @@ class IngredientViewSet(viewsets.ModelViewSet):
 
 class ListSubscriptions(viewsets.ModelViewSet):
     serializer_class = SubscriptionsSerializer
+    pagination_class = CustomPaginator
 
     def get_queryset(self):
         user = self.request.user
         return User.objects.filter(subscribing__user=user)
-
-
-def delete(request, id, model):
-    user = request.user
-    recipe = get_object_or_404(model, id=id)
-    obj = get_object_or_404(model, user=user, recipe=recipe)
-    obj.delete()
-    return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-def post(request, id, model):
-    user = request.user
-    recipe = get_object_or_404(Recipe, id=id)
-    model.objects.get_or_create(user=user, recipe=recipe)
-    serializer = FavoriteSerializer(recipe, context={'request': request})
-    return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class APISubscribe(views.APIView):
