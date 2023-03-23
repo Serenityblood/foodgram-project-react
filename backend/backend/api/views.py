@@ -98,13 +98,16 @@ class IngredientViewSet(viewsets.ModelViewSet):
     serach_fields = ('^name')
 
 
-class ListSubscriptions(viewsets.ModelViewSet):
-    serializer_class = SubscriptionsSerializer
-    pagination_class = CustomPaginator
-
-    def get_queryset(self):
-        user = self.request.user
-        return User.objects.filter(subscribing__user=user)
+class ListSubscriptions(views.APIView, CustomPaginator):
+    def get(self, request):
+        user = request.user
+        queryset = User.objects.filter(subscribing__user=user)
+        paginated = self.paginate_queryset(queryset, request, view=self)
+        return self.get_paginated_response(
+            SubscriptionsSerializer(
+                paginated, context={'request': request}, many=True
+            ).data
+        )
 
 
 class APISubscribe(views.APIView):

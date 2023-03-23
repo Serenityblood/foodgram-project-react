@@ -227,11 +227,12 @@ class SubscriptionsSerializer(serializers.ModelSerializer):
 
     def get_recipes(self, author):
         recipes = author.recipes.all()
-        limit = self.context.get('request').query_params.get('limit')
+        request = self.context.get('request')
+        if not request or request.user.is_anonymous:
+            return False
+        limit = request.query_params.get('limit')
         if limit:
-            return FavoriteRecipeSerializer(
-                recipes[:int(limit)], many=True
-            ).data
+            recipes = recipes[:int(limit)]
         return FavoriteRecipeSerializer(recipes, many=True).data
 
     def get_is_subscribed(self, author):

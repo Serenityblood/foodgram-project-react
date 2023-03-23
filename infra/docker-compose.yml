@@ -6,12 +6,10 @@ services:
     volumes:
       - database:/var/lib/postgresql/data/
     env_file:
-      - .env
+      - ./.env
 
   web:
-    build:
-      context: ../backend/backend
-      dockerfile: Dockerfile
+    image: serenityblood/foodgrdam_backend:latest
     restart: always
     volumes:
     - static_value:/app/static/
@@ -19,12 +17,10 @@ services:
     depends_on:
       - db
     env_file:
-      - .env
+      - ./.env
 
   frontend:
-    build:
-      context: ../frontend
-      dockerfile: Dockerfile
+    image: serenityblood/foodgrdam_frontend:latest
     volumes:
       - ../frontend/:/app/result_build/
     depends_on:
