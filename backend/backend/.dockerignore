@@ -1,2 +1,4 @@
 .env
 Dockerfile
+api/__pycache__/
+users/__pycache__/
