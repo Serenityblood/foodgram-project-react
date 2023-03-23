@@ -1,4 +1,5 @@
 import simplejson
+
 from django.core.management.base import BaseCommand
 
 from api.models import Tag, Ingredient
@@ -17,13 +18,8 @@ class Command(BaseCommand):
         for data in tag_data:
             Tag.objects.get_or_create(**data)
 
-        f = open('ingredients.json', 'r', encoding='UTF-8')
+        f = open('data/ingredients.json', 'r', encoding='UTF-8')
         obj = simplejson.load(f)
-        objs = [
-            Ingredient(
-                name=parametr['name'],
-                measurement_unit=parametr['measurement_unit']
-                ) for parametr in obj
-            ]
-        Ingredient.objects.bulk_create(objs)
+        for data in obj:
+            Ingredient.objects.get_or_create(**data)
         print('Data migration comlete')

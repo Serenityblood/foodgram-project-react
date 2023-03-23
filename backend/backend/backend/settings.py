@@ -1,8 +1,5 @@
 import os
 
-from dotenv import load_dotenv
-
-load_dotenv()
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -67,12 +64,12 @@ if os.getenv('SQLITE') is True:
 else:
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': 'fd',
-            'USER': 'postgres',
-            'PASSWORD': 'postgres',
-            'HOST': '127.0.0.1',
-            'PORT': '5432',
+            'ENGINE': os.getenv('DB_ENGINE', default='django.db.backends.postgresql'),
+            'NAME': os.getenv('DB_NAME'),
+            'USER': os.getenv('POSTGRES_USER'),
+            'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
+            'HOST': os.getenv('DB_HOST'),
+            'PORT': os.getenv('DB_PORT'),
         }
     }
 
@@ -137,6 +134,8 @@ AUTH_USER_MODEL = 'users.User'
 
 ALLOWED_SYMBOLS = r'[\w.@+-]'
 
+ALLOWED_SLUG_SYMBOLS = r'^[-a-zA-Z0-9_]+$'
+
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
@@ -145,3 +144,7 @@ USERNAME_SIZE = 150
 EMAIL_SIZE = 254
 
 NAME_SIZE = 200
+
+COLOR_SIZE = 7
+
+SLUG_SIZE = 200

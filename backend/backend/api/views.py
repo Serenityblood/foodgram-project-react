@@ -50,8 +50,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     def delete_req(self, request, id, model):
         get_object_or_404(
-           model, user=request.user, recipe=get_object_or_404(Recipe, id=id)
-            ).delete()
+            model, user=request.user, recipe=get_object_or_404(Recipe, id=id)
+        ).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(methods=['GET'], permission_classes=(AllowAny,), detail=False)
@@ -61,7 +61,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             recipe__shopping_cart__user=user).values(
             name=F('ingredient__name'),
             unit=F('ingredient__measurement_unit')
-            ).annotate(amount=Sum('amount')).order_by()
+        ).annotate(amount=Sum('amount')).order_by()
         return get_shopping_list(self, shopping_list)
 
     @action(methods=['POST'], detail=True)
@@ -118,6 +118,6 @@ class APISubscribe(views.APIView):
 
     def delete(self, request, id):
         get_object_or_404(
-           Subscribe, user=request.user, author=get_object_or_404(User, id=id)
-            ).delete()
+            Subscribe, user=request.user, author=get_object_or_404(User, id=id)
+        ).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

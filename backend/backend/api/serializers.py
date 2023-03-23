@@ -22,10 +22,11 @@ class UserSerializer(serializers.ModelSerializer):
         )
 
     def get_is_subscribed(self, author):
+        request = self.context.get('request')
         return (
-            'request' in self.context
-            and self.context.get('request').user.is_authenticated
-            and self.context['request'].user.subscriber.filter(
+            request
+            and request.user.is_authenticated
+            and request.user.subscriber.filter(
                 author=author
             ).exists()
         )
@@ -79,8 +80,9 @@ class ViewRecipeSerializer(serializers.ModelSerializer):
         )
 
     def get_is_favorited(self, obj):
+        request = self.context.get('request')
         return (
-            'request' in self.context
+            request
             and self.context.get('request').user.is_authenticated
             and self.context.get('request').user.favorite.filter(
                 recipe=obj
@@ -88,10 +90,11 @@ class ViewRecipeSerializer(serializers.ModelSerializer):
         )
 
     def get_is_in_shopping_cart(self, obj):
+        request = self.context.get('request')
         return (
-            'request' in self.context
-            and self.context.get('request').user.is_authenticated
-            and self.context.get('request').user.shopping_cart.filter(
+            request
+            and request.user.is_authenticated
+            and request.user.shopping_cart.filter(
                 recipe=obj
             ).exists()
         )
@@ -181,7 +184,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
                 )
         if len(check_ingredients) > len(set(check_ingredients)):
             return serializers.ValidationError(
-               'Ингредиенты должны быть уникальными'
+                'Ингредиенты должны быть уникальными'
             )
         return data
 
@@ -224,16 +227,19 @@ class SubscriptionsSerializer(serializers.ModelSerializer):
 
     def get_recipes(self, author):
         recipes = author.recipes.all()
-        if 'limit' in self.context.get('request').query_params:
-            limit = int(self.context.get('request').query_params.get('limit'))
-            return FavoriteRecipeSerializer(recipes[:limit], many=True).data
+        limit = self.context.get('request').query_params.get('limit')
+        if limit:
+            return FavoriteRecipeSerializer(
+                recipes[:int(limit)], many=True
+            ).data
         return FavoriteRecipeSerializer(recipes, many=True).data
 
     def get_is_subscribed(self, author):
+        request = self.context.get('request')
         return (
-            'request' in self.context
-            and self.context.get('request').user.is_authenticated
-            and self.context.get('request').user.subscriber.filter(
+            request
+            and request.user.is_authenticated
+            and request.user.subscriber.filter(
                 author=author
             ).exists()
         )
@@ -253,7 +259,7 @@ class FavoriteSerializer(serializers.ModelSerializer):
     def validate(self, data):
         user = data['user']
         recipe = data['recipe']
-        if Favorite.objects.filter(recipe=recipe, user=user).exists():
+        if user.favorite.filter(recipe=recipe).exists():
             return serializers.ValidationError('Уже есть')
         return data
 
@@ -269,6 +275,6 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
     def validate(self, data):
         user = data['user']
         recipe = data['recipe']
-        if ShoppingCart.objects.filter(user=user, recipe=recipe).exists():
+        if user.shopping_cart.filter(recipe=recipe).exists():
             return serializers.ValidationError('Уже есть')
         return data
