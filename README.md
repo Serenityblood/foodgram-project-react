@@ -202,6 +202,10 @@ sudo docker stop $(sudo docker ps -a -q) && sudo docker rm $(sudo docker ps -a -
 sudo docker system prune -a
 ```
 
+### Redoc
+
+http://158.160.24.255/api/docs/redoc.html
+
 ### Автор
 
 * **Бушланов Глеб** - [Serenityblood](https://github.com/serenityblood)
