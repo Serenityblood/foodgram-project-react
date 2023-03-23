@@ -15,7 +15,7 @@ class UserAdmin(admin.ModelAdmin):
         return obj.subscribing.count()
 
     def get_favorite_count(self, obj):
-        return obj.favorite_set.count()
+        return obj.favorite.count()
 
     get_subscribers_count.short_description = 'Количество подписчиков'
     get_favorite_count.short_description = 'Количество избранных'
