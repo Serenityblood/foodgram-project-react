@@ -20,7 +20,7 @@ services:
       - ./.env
 
   frontend:
-    image: serenityblood/foodgrdam_frontend:latest
+    image: serenityblood/foodgram_frontend:latest
     volumes:
       - ../frontend/:/app/result_build/
     depends_on:
