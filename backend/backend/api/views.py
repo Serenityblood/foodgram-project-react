@@ -30,7 +30,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
     filterset_class = RecipeFilter
     filterset_field = ('tags', 'author')
-    ordering_field = ('pub_date',)
+    ordering_field = ('-pub_date',)
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
@@ -95,8 +95,8 @@ class IngredientViewSet(viewsets.ModelViewSet):
     pagination_class = None
     permission_classes = (AllowAny,)
     http_method_names = ['get']
-    filter_backends = (IngredientFilter,)
-    serach_fields = ('^name',)
+    filterset_class = IngredientFilter
+    filter_backends = [DjangoFilterBackend]
 
 
 class ListSubscriptions(views.APIView, CustomPaginator):

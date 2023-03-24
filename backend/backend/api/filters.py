@@ -1,9 +1,8 @@
-from django_filters import AllValuesMultipleFilter
+from django_filters import AllValuesMultipleFilter, CharFilter, FilterSet
 from django_filters import rest_framework as filters
 from django_filters.widgets import BooleanWidget
-from rest_framework.filters import SearchFilter
 
-from .models import Recipe
+from .models import Ingredient, Recipe
 
 
 class RecipeFilter(filters.FilterSet):
@@ -34,5 +33,13 @@ class RecipeFilter(filters.FilterSet):
         ]
 
 
-class IngredientFilter(SearchFilter):
-    search_param = 'name'
+class IngredientFilter(FilterSet):
+    name = CharFilter(
+        label='name',
+        field_name='name',
+        lookup_expr='incontains'
+    )
+
+    class Meta:
+        model = Ingredient
+        fields = ('name',)
