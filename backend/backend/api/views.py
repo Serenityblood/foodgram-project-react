@@ -95,8 +95,8 @@ class IngredientViewSet(viewsets.ModelViewSet):
     pagination_class = None
     permission_classes = (AllowAny,)
     http_method_names = ['get']
-    filterset_class = IngredientFilter
-    filter_backends = [DjangoFilterBackend]
+    filter_backends = (IngredientFilter,)
+    search_fields = ('^name',)
 
 
 class ListSubscriptions(views.APIView, CustomPaginator):
