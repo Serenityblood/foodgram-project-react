@@ -6,7 +6,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
-from .filters import RecipeFilter
+from .filters import IngredientFilter, RecipeFilter
 from .models import (
     Favorite, Ingredient, Recipe, RecipeIngredient, ShoppingCart, Tag
 )
@@ -95,7 +95,9 @@ class IngredientViewSet(viewsets.ModelViewSet):
     pagination_class = None
     permission_classes = (AllowAny,)
     http_method_names = ['get']
-    serach_fields = ('^name')
+    serach_fields = ('^name',)
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = IngredientFilter
 
 
 class ListSubscriptions(views.APIView, CustomPaginator):
