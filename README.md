@@ -4,7 +4,7 @@
 
 Адрес развёрнутого приложения:
 ```
-http://158.160.24.255/
+http://foodgramserenity.ddns.net/
 ```
 ### Описание:
 Проект Foodgram продуктовый помощник - платформа для публикации рецептов. 
@@ -204,7 +204,7 @@ sudo docker system prune -a
 
 ### Redoc
 
-http://158.160.24.255/api/docs/redoc.html
+http://foodgramserenity.ddns.net/api/docs/redoc.html
 
 ### Автор
 
